@@ -1,0 +1,41 @@
+services:
+  hero-db:
+    image: postgres:15
+    container_name: hero-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: Adm1nP455
+      POSTGRES_DB: herodb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./HeroesAPI
+      dockerfile: Dockerfile
+    container_name: hero-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=hero-db;Port=5432;Database=herodb;Username=admin;Password=Adm1nP455"
+    ports:
+      - "8080:8080"
+    depends_on:
+      hero-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  hero-sdk:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    volumes:
+      - ./HeroesAPI:/src
+    working_dir: /src
+
+volumes:
+  postgres_data:
