@@ -8,7 +8,8 @@ Aplicação **Fullstack** para gerenciamento de super-heróis, desenvolvida como
 
 - **Backend**: ASP.NET Core Web API (.NET 8) + Entity Framework Core  
 - **Frontend**: Angular  
-- **Banco de dados**: PostgreSQL (com Npgsql.EntityFrameworkCore.PostgreSQL)
+- **Banco de dados**: PostgreSQL 15 (Docker Container)
+- **Containerização**: Docker + Docker Compose
 - **Documentação**: Swagger/OpenAPI
 
 ---
@@ -24,123 +25,144 @@ Aplicação **Fullstack** para gerenciamento de super-heróis, desenvolvida como
 - ✅ Validação de nome de herói único
 - ✅ Associação de múltiplos superpoderes
 - ✅ Tratamento de erros e respostas HTTP apropriadas
+- ✅ **Deploy automatizado** com Docker Compose
 
 ---
 
 ## 📋 Pré-requisitos
 
 Antes de executar a aplicação, certifique-se de ter instalado:
-- .NET 8 SDK
-- Node.js (versão 18 ou superior)
-- Angular CLI
-- PostgreSQL (ou Docker para container PostgreSQL)
+- **Docker Desktop** (Windows/Mac) ou **Docker Engine** (Linux)
+- **Docker Compose** (já incluído no Docker Desktop)
 - Git
 
 ---
 
-🚀 Como Executar
+## 🐳 Como Executar com Docker Compose
 
-1. Configurar o PostgreSQL:
-# Usando Docker
-docker run --name hero-db -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=password -e POSTGRES_DB=herodb -p 5432:5432 -d postgres:latest
+### 1. **Clone o repositório**
+```bash
+git clone https://github.com/zavattaro/gerenciador_herois.git
+cd HeroManager
+2. Execute a aplicação com um comando
+bash
+docker-compose up -d
+3. Acesse as aplicações
+API Backend: http://localhost:8080
 
----
+Swagger UI: http://localhost:8080/swagger
 
-2. Backend (API .NET):
-# Clone o repositório
-git clone <url-do-repositorio>
-cd HeroManager/Backend
+Frontend Angular: http://localhost:4200 (se configurado)
 
-# Restaure as dependências
-dotnet restore
+PostgreSQL: localhost:5432
 
-# Execute as migrações do banco de dados
-dotnet ef database update
+🏗️ Arquitetura Docker
+A aplicação utiliza 3 containers interconectados:
 
-# Execute a aplicação
-dotnet run
-
-A API estará disponível em: https://localhost:7000
-Swagger UI: https://localhost:7000/swagger
-
----
-
-3. Frontend (Angular):
-# Navegue para a pasta do frontend
-cd ../Frontend
-
-# Instale as dependências
-npm install
-
-# Execute a aplicação
-ng serve
-
-O frontend estará disponível em: http://localhost:4200
-
----
-
+yaml
+services:
+  hero-db:     # PostgreSQL 15 com dados pré-populados
+  hero-api:    # API .NET 8 com Auto-Migration
+  hero-sdk:    # .NET SDK para desenvolvimento
+📦 Serviços Docker
+Container	Descrição	Porta
+hero-db	Banco PostgreSQL com dados iniciais	5432
+hero-api	API .NET com Swagger	8080
+hero-sdk	Ambiente de desenvolvimento	-
 🗄️ Estrutura do Banco de Dados
 O projeto utiliza três tabelas principais no PostgreSQL:
 
-herois - Informações dos heróis
+heroes - Informações dos heróis
 
-superpoderes - Catálogo de superpoderes
+superpowers - Catálogo de superpoderes
 
-heroissuperpoderes - Relacionamento muitos-para-muitos
+hero_superpowers - Relacionamento muitos-para-muitos
 
----
+📊 Dados Iniciais
+O sistema já vem populado com:
+
+🦸 10 heróis famosos (Super-Homem, Batman, etc.)
+
+⚡ 20 superpoderes diferentes
+
+🔗 Relacionamentos pré-definidos
 
 🧪 Testando a API
-Use a interface Swagger ou ferramentas como Postman para testar os endpoints:
+Via Swagger UI
+Acesse: http://localhost:8080/swagger
 
-GET /api/herois - Listar todos os heróis
+Via curl
+bash
+# Listar todos os heróis
+curl http://localhost:8080/api/heroes
 
-GET /api/herois/{id} - Buscar herói por ID
+# Criar novo herói
+curl -X POST "http://localhost:8080/api/heroes" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Wanda Maximoff",
+    "heroName": "Feiticeira Escarlate", 
+    "birthDate": "1989-02-10",
+    "height": 1.70,
+    "weight": 59.0,
+    "superpowerIds": [9, 17]
+  }'
+🔧 Funcionalidades Técnicas Avançadas
+🐳 Containerização Completa: Todos os serviços em Docker
 
-POST /api/herois - Criar novo herói
+🔄 Auto-Migration: Banco criado automaticamente no startup
 
-PUT /api/herois/{id} - Atualizar herói
+📦 Data Seeding: Dados iniciais populados automaticamente
 
-DELETE /api/herois/{id} - Excluir herói
+🔒 Health Checks: Monitoramento de saúde dos containers
 
----
+🌐 Network Isolation: Rede privada entre containers
 
-🔧 Decisões Técnicas
-PostgreSQL: Escolhido por ser open-source, robusto e amplamente utilizado
+📊 Volume Persistence: Dados persistidos em volume Docker
 
-Entity Framework Core: ORM para simplificar o acesso ao banco de dados
+🚀 Comandos Úteis
+bash
+# Ver status dos containers
+docker-compose ps
 
-Swagger: Para documentação automática e teste da API
+# Ver logs da API
+docker-compose logs api
 
-Angular Reactive Forms: Para validação robusta no frontend
+# Parar aplicação
+docker-compose down
 
-Tratamento de erros centralizado: Middleware personalizado no backend
+# Parar e remover volumes
+docker-compose down -v
 
-Docker: Para facilitar a execução do banco de dados
-
----
-
+# Rebuildar imagens
+docker-compose up -d --build
 📝 Próximas Melhorias Possíveis
-Autenticação e autorização
+Autenticação e autorização (JWT)
 
 Paginação na listagem de heróis
 
 Upload de imagens para os heróis
 
-Logs detalhados da aplicação
+Logs centralizados (ELK Stack)
 
 Testes unitários e de integração
 
-Docker-compose para toda a aplicação
+Monitoramento (Prometheus + Grafana)
 
----
+CI/CD pipeline (GitHub Actions)
 
 🤓 Desenvolvedor
 Enio Zavattaro - eniozavat@gmail.com
 https://www.linkedin.com/in/eniozavattaro/
 
----
-
 📄 Licença
 Este projeto é desenvolvido para fins de avaliação técnica.
 
+🙋‍♂️ Suporte
+Em caso de problemas com a execução:
+
+Verifique se o Docker está rodando
+
+Execute docker-compose down -v e suba novamente
+
+Consulte os logs com docker-compose logs api
