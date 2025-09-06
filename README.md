@@ -64,11 +64,13 @@ services:
   hero-db:     # PostgreSQL 15 com dados pré-populados
   hero-api:    # API .NET 8 com Auto-Migration
   hero-sdk:    # .NET SDK para desenvolvimento
+
 📦 Serviços Docker
 Container	Descrição	Porta
 hero-db	Banco PostgreSQL com dados iniciais	5432
 hero-api	API .NET com Swagger	8080
 hero-sdk	Ambiente de desenvolvimento	-
+
 🗄️ Estrutura do Banco de Dados
 O projeto utiliza três tabelas principais no PostgreSQL:
 
@@ -107,6 +109,7 @@ curl -X POST "http://localhost:8080/api/heroes" \
     "weight": 59.0,
     "superpowerIds": [9, 17]
   }'
+
 🔧 Funcionalidades Técnicas Avançadas
 🐳 Containerização Completa: Todos os serviços em Docker
 
@@ -136,6 +139,7 @@ docker-compose down -v
 
 # Rebuildar imagens
 docker-compose up -d --build
+
 📝 Próximas Melhorias Possíveis
 Autenticação e autorização (JWT)
 
