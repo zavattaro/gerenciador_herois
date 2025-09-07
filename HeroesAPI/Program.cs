@@ -4,10 +4,11 @@ using HeroesAPI.Repositories;
 using HeroesAPI.Services;
 using HeroesAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona CORS
+// Add CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -31,7 +32,26 @@ builder.Services.AddScoped<ISuperpowerService, SuperpowerService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "🚀 Heroes API - Sistema de Gerenciamento de Super-Heróis",
+        Version = "v1.0.0-justice",
+        Description = "⚠️ **ATENÇÃO:** Esta API contém superpoderes! Use com responsabilidade. " +
+                 "Sistema completo para cadastro, edição e controle de heróis e suas habilidades extraordinárias. " +
+                 "Desenvolvido com as melhores tecnologias .NET para salvar o dia! 🦸‍♂️",
+        Contact = new OpenApiContact
+        {
+            Name = "🤓 Enio Zavattaro - Herói Dev",
+            Email = "eniozavat@gmail.com",
+            Url = new Uri("https://www.linkedin.com/in/eniozavattaro/")
+        }
+    });
+
+    c.EnableAnnotations(); // ✅ HABILITA ANNOTATIONS DO SWAGGER
+});
 
 var app = builder.Build();
 

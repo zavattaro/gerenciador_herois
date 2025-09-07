@@ -4,14 +4,44 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HeroesAPI.Data
 {
+    /// <summary>
+    /// Contexto do banco de dados para a aplicação HeroesAPI
+    /// </summary>
+    /// <remarks>
+    /// Responsável por configurar o Entity Framework e definir o mapeamento
+    /// das entidades para as tabelas do banco de dados PostgreSQL
+    /// </remarks>
     public class ApplicationDbContext : DbContext
     {
+        /// <summary>
+        /// Construtor do contexto do banco de dados
+        /// </summary>
+        /// <param name="options">Opções de configuração do DbContext</param>
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
+        /// <summary>
+        /// DbSet para a entidade Hero (tabela heroes)
+        /// </summary>
         public DbSet<Hero> Heroes { get; set; }
+
+        /// <summary>
+        /// DbSet para a entidade Superpower (tabela superpowers)
+        /// </summary>
         public DbSet<Superpower> Superpowers { get; set; }
+
+        /// <summary>
+        /// DbSet para a entidade de junção HeroSuperpower (tabela hero_superpowers)
+        /// </summary>
         public DbSet<HeroSuperpower> HeroSuperpowers { get; set; }
 
+        /// <summary>
+        /// Configura conversões de tipo para propriedades do modelo
+        /// </summary>
+        /// <param name="configurationBuilder">Builder para configuração de convenções</param>
+        /// <remarks>
+        /// Define que todas as propriedades DateTime devem ser convertidas para UTC
+        /// e armazenadas como "timestamp with time zone" no PostgreSQL
+        /// </remarks>
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties<DateTime>()
@@ -19,14 +49,32 @@ namespace HeroesAPI.Data
                 .HaveColumnType("timestamp with time zone");
         }
 
+        /// <summary>
+        /// Conversor personalizado para garantir que DateTime seja sempre UTC
+        /// </summary>
         public class DateTimeToUtcConverter : ValueConverter<DateTime, DateTime>
         {
+            /// <summary>
+            /// Construtor do conversor UTC
+            /// </summary>
             public DateTimeToUtcConverter() : base(
                 v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
                 v => DateTime.SpecifyKind(v, DateTimeKind.Utc))
             { }
         }
 
+        /// <summary>
+        /// Configura o modelo de dados e os relacionamentos
+        /// </summary>
+        /// <param name="modelBuilder">Builder para configuração do modelo</param>
+        /// <remarks>
+        /// Método responsável por:
+        /// - Configurar nomes de tabelas em snake_case
+        /// - Definir chaves primárias e estrangeiras
+        /// - Configurar relacionamentos muitos-para-muitos
+        /// - Aplicar constraints de unicidade
+        /// - Popular dados iniciais (seed)
+        /// </remarks>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

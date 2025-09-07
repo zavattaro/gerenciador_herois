@@ -1,5 +1,12 @@
 ﻿using HeroesAPI.Models;
 
+/// <summary>
+/// Interface para operações de repositório de superpoderes
+/// </summary>
+/// <remarks>
+/// Define o contrato para operações CRUD de superpoderes,
+/// permitindo o gerenciamento do catálogo de habilidades especiais
+/// </remarks>
 namespace HeroesAPI.Repositories.Interfaces
 {
     public interface ISuperpowerRepository

@@ -2,9 +2,15 @@
 using HeroesAPI.Models;
 using HeroesAPI.Repositories.Interfaces;
 
+/// <summary>
+/// Interface específica para operações de repositório de heróis
+/// </summary>
+/// <remarks>
+/// Estende a interface genérica IRepository com métodos especializados
+/// para gerenciamento de heróis e suas relações com superpoderes
+/// </remarks>
 public interface IHeroRepository : IRepository<Hero>
 {
-    // Métodos específicos para heróis
     Task<Hero?> GetByHeroNameAsync(string heroName);
     Task<bool> HeroNameExistsAsync(string heroName);
     Task<IEnumerable<HeroWithSuperpowersDto>> GetHeroesWithSuperpowersAsync();
