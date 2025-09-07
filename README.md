@@ -41,13 +41,17 @@ Antes de executar a aplicação, certifique-se de ter instalado:
 ## 🐳 Como Executar com Docker Compose
 
 ### 1. **Clone o repositório**
-```bash
+(abra o bash em uma pasta vazia)
+
 git clone https://github.com/zavattaro/gerenciador_herois.git
+
+2. Navegue para a pasta clonada
 cd gerenciador_herois
 
-2. Execute a aplicação com um comando
-bash
+3. Execute a aplicação com um comando
 docker-compose up -d --build
+
+```
 
 3. Acesse as aplicações
 API Backend: http://localhost:8080
@@ -58,7 +62,64 @@ Frontend Angular: http://localhost:4200 (se já configurado)
 
 PostgreSQL: localhost:5432
 
-🏗️ Arquitetura Docker
+--- 
+
+## 🏗️ Arquitetura e Organização
+
+### Estrutura de Pastas
+HeroesAPI/
+├── 📁 Controllers/ # Endpoints da API (Minimal API)
+├── 📁 Models/ # Entidades de Domínio (Hero, Superpower)
+├── 📁 DTO/ # Data Transfer Objects
+├── 📁 Data/ # Entity Framework Context
+├── 📁 Repositories/ # Padrão Repository
+├── 📁 Service/ # Camada de Serviços
+└── 📁 Properties/ # Configurações de execução
+
+
+### Decisões Arquiteturais
+
+**1. Clean Architecture Simplificada**
+- Separação clara entre responsabilidades
+- Controllers → Services → Repositories → Data
+- Injeção de dependência via construtor
+
+**2. Padrão Repository**
+- Interfaces em `Repositories/Interfaces/`
+- Implementações concretas em `Repositories/`
+- Abstração completa do acesso a dados
+
+**3. Service Layer**
+- Lógica de negócio isolada em `Service/`
+- Validações complexas centralizadas
+- `IHeroService` e `ISuperpowerService` com contratos claros
+
+**4. Entity Framework Code-First**
+- `ApplicationDbContext` configurado para PostgreSQL
+- Migrations para controle de versão do schema
+- Tabela `HeroSuperpower` para relação N-N
+
+**5. DTO Pattern**
+- `CreateHeroRequestDto`: Validações de input
+- `HeroWithSuperpowersDto`: Response com relacionamentos
+- Prevenção de over-posting e exposure
+
+### Tecnologias e Padrões
+- **.NET 8**: Performance e recursos modernos
+- **Entity Framework Core**: ORM com migrations
+- **PostgreSQL**: Banco relacional robusto
+- **Repository Pattern**: Abstração de persistência
+- **Dependency Injection**: Acoplamento mínimo
+- **Swagger**: Documentação automática da API
+
+### Vantagens desta Estrutura
+- ✅ **Testabilidade**: Camadas isoladas facilitam testes
+- ✅ **Manutenibilidade**: Código organizado e claro
+- ✅ **Escalabilidade**: Fácil adição de novas features
+- ✅ **Flexibilidade**: Troca de implementações simplificada
+
+
+## 🏗️ Arquitetura Docker
 A aplicação utiliza 3 containers interconectados:
 
 yaml
@@ -91,17 +152,21 @@ O sistema já vem populado com:
 
 🔗 Relacionamentos pré-definidos
 
-🧪 Testando a API
-Via Swagger UI
+## 🧪 Testando a API
+
+### Via Swagger UI
 Acesse: http://localhost:8080/swagger
 
-Via curl
-bash
-# Listar todos os heróis
-curl http://localhost:8080/api/heroes
+### Via HTTP Requests
+```bash
+# Listar heróis
+GET http://localhost:8080/api/Hero
+
+# Buscar herói por ID  
+GET http://localhost:8080/api/Hero/1
 
 # Criar novo herói
-curl -X POST "http://localhost:8080/api/heroes" \
+curl -X POST "http://localhost:8080/api/Hero" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Wanda Maximoff",
