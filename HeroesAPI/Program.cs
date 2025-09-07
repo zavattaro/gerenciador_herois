@@ -4,17 +4,16 @@ using HeroesAPI.Repositories;
 using HeroesAPI.Services;
 using HeroesAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using HeroesAPI.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Adiciona CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularApp",
+    options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
+            policy.AllowAnyOrigin()  // Permite qualquer origem (localhost:4200, etc)
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
@@ -26,6 +25,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IHeroRepository, HeroRepository>();
 builder.Services.AddScoped<IHeroService, HeroService>();
+builder.Services.AddScoped<ISuperpowerRepository, SuperpowerRepository>();
+builder.Services.AddScoped<ISuperpowerService, SuperpowerService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -34,14 +35,14 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseCors("AllowAll");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseCors("AllowAngularApp");
 
 app.UseHttpsRedirection();
 

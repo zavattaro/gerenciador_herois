@@ -29,25 +29,30 @@ namespace HeroesAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             // Configurar nomes das tabelas para snake_case
             modelBuilder.Entity<Hero>().ToTable("heroes");
             modelBuilder.Entity<Superpower>().ToTable("superpowers");
             modelBuilder.Entity<HeroSuperpower>().ToTable("hero_superpowers");
 
-            // Configurar chave primária para HeroSuperpower
+            // Configurar chave primária composta para HeroSuperpower
             modelBuilder.Entity<HeroSuperpower>()
                 .HasKey(hs => new { hs.HeroId, hs.SuperpowerId });
 
-            // Configurar relacionamentos
+            // Configurar relacionamento Hero -> HeroSuperpower
             modelBuilder.Entity<HeroSuperpower>()
                 .HasOne(hs => hs.Hero)
                 .WithMany(h => h.HeroSuperpowers)
-                .HasForeignKey(hs => hs.HeroId);
+                .HasForeignKey(hs => hs.HeroId)
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // Configurar relacionamento Superpower -> HeroSuperpower
             modelBuilder.Entity<HeroSuperpower>()
                 .HasOne(hs => hs.Superpower)
                 .WithMany(s => s.HeroSuperpowers)
-                .HasForeignKey(hs => hs.SuperpowerId);
+                .HasForeignKey(hs => hs.SuperpowerId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Unique constraint para HeroName
             modelBuilder.Entity<Hero>()

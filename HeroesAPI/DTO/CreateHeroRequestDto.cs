@@ -1,15 +1,26 @@
-﻿
+﻿using System.ComponentModel.DataAnnotations;
+
 namespace HeroesAPI.DTOs
 {
-    public class HeroWithSuperpowersDto
+    public class CreateHeroRequestDto
     {
-        public int Id { get; set; }
+        [Required]
         public string Name { get; set; } = string.Empty;
+
+        [Required]
         public string HeroName { get; set; } = string.Empty;
+
+        [Required]
         public DateTime BirthDate { get; set; }
+
+        [Required]
         public double Height { get; set; }
+
+        [Required]
         public double Weight { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public List<SuperpowerDto> Superpowers { get; set; } = new List<SuperpowerDto>();
+
+        [Required]
+        public List<int> SuperpowerIds { get; set; } = new List<int>();
     }
+
 }

@@ -1,13 +1,12 @@
-﻿using HeroesAPI.Data;
+﻿using HeroesAPI.Dtos;
 using HeroesAPI.DTOs;
 using HeroesAPI.Models;
-using HeroesAPI.Repositories;
 using HeroesAPI.Repositories.Interfaces;
-using HeroesAPI.Services;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace HeroesAPI.Service
+namespace HeroesAPI.Services
 {
     public class HeroService : IHeroService
     {
@@ -28,51 +27,88 @@ namespace HeroesAPI.Service
             return await _heroRepository.GetHeroWithSuperpowersByIdAsync(id);
         }
 
-        public async Task<Hero> CreateHeroAsync(Hero hero)
+        public async Task<HeroWithSuperpowersDto> CreateHeroAsync(CreateHeroRequestDto createHeroRequest)
         {
-            // Validar se nome de herói já existe
-            if (await _heroRepository.HeroNameExistsAsync(hero.HeroName))
+            // 1. Validar se nome já existe
+            if (await _heroRepository.HeroNameExistsAsync(createHeroRequest.HeroName))
             {
-                throw new System.Exception($"Herói com o nome {hero.HeroName} já existe");
+                throw new InvalidOperationException($"Herói com o nome {createHeroRequest.HeroName} já existe");
             }
 
-            await _heroRepository.AddAsync(hero);
-            return hero;
+            // 2. Validar se todos os superpoderes existem
+            foreach (var superpowerId in createHeroRequest.SuperpowerIds)
+            {
+                if (!await _heroRepository.SuperpowerExistsAsync(superpowerId))
+                {
+                    throw new InvalidOperationException($"Superpoder com ID {superpowerId} não encontrado");
+                }
+            }
+
+            // 3. Converter DTO para Model
+            var hero = new Hero
+            {
+                Name = createHeroRequest.Name,
+                HeroName = createHeroRequest.HeroName,
+                BirthDate = createHeroRequest.BirthDate,
+                Height = createHeroRequest.Height,
+                Weight = createHeroRequest.Weight
+            };
+
+            // 4. Salvar herói no bd
+            var createdHero = await _heroRepository.AddAsync(hero, createHeroRequest.SuperpowerIds);
+
+            // 5. Buscar e retornar o herói com superpoderes
+            return await _heroRepository.GetHeroWithSuperpowersByIdAsync(createdHero.Id)
+                ?? throw new InvalidOperationException("Erro ao criar herói");
         }
 
-        public async Task UpdateHeroAsync(int id, Hero hero)
+        public async Task UpdateHeroAsync(int id, UpdateHeroRequestDto updateHeroRequest)
         {
-            if (id != hero.Id)
+            if (id != updateHeroRequest.Id)
             {
-                throw new System.Exception("ID mismatch");
+                throw new ArgumentException("ID mismatch");
             }
 
-            // Busca o herói existente no banco de dados
+            // Busca o herói existente
             var existingHero = await _heroRepository.GetByIdAsync(id);
             if (existingHero == null)
             {
-                throw new System.Exception("Hero not found");
+                throw new KeyNotFoundException("Herói não encontrado");
             }
 
-            // Validar se nome de herói já existe
-            var heroWithSameName = await _heroRepository.GetByHeroNameAsync(hero.HeroName);
+            // Validar se nome de herói já existe (para outro herói)
+            var heroWithSameName = await _heroRepository.GetByHeroNameAsync(updateHeroRequest.HeroName);
             if (heroWithSameName != null && heroWithSameName.Id != id)
             {
-                throw new System.Exception($"Hero with name {hero.HeroName} already exists");
+                throw new InvalidOperationException($"Herói com o nome {updateHeroRequest.HeroName} já existe");
             }
 
-            // Atualizar apenas os campos necessários (evita problemas de tracking)
-            existingHero.Name = hero.Name;
-            existingHero.HeroName = hero.HeroName;
-            existingHero.BirthDate = hero.BirthDate;
-            existingHero.Height = hero.Height;
-            existingHero.Weight = hero.Weight;
+            // Validar se todos os superpoderes existem
+            foreach (var superpowerId in updateHeroRequest.SuperpowerIds)
+            {
+                if (!await _heroRepository.SuperpowerExistsAsync(superpowerId))
+                {
+                    throw new InvalidOperationException($"Superpoder com ID {superpowerId} não encontrado");
+                }
+            }
 
-            await _heroRepository.UpdateAsync(existingHero);
+            // Atualizar propriedades
+            existingHero.Name = updateHeroRequest.Name;
+            existingHero.HeroName = updateHeroRequest.HeroName;
+            existingHero.BirthDate = updateHeroRequest.BirthDate;
+            existingHero.Height = updateHeroRequest.Height;
+            existingHero.Weight = updateHeroRequest.Weight;
+
+            await _heroRepository.UpdateAsync(existingHero, updateHeroRequest.SuperpowerIds);
         }
 
         public async Task DeleteHeroAsync(int id)
         {
+            if (!await _heroRepository.ExistsAsync(id))
+            {
+                throw new KeyNotFoundException("Herói não encontrado");
+            }
+
             await _heroRepository.DeleteAsync(id);
         }
 

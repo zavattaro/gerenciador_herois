@@ -15,6 +15,44 @@ namespace HeroesAPI.Repositories
             _context = context;
         }
 
+        public async Task<Hero> AddAsync(Hero hero)
+        {
+            return await AddAsync(hero, new List<int>());
+        }
+
+        public async Task<Hero> AddAsync(Hero hero, List<int> superpowerIds)
+        {
+            try
+            {
+                hero.BirthDate = hero.BirthDate.ToUniversalTime();
+                hero.CreatedAt = DateTime.UtcNow;
+
+                // Vincular superpoderes
+                foreach (var superpowerId in superpowerIds)
+                {
+                    var superpower = await _context.Superpowers.FindAsync(superpowerId);
+                    if (superpower != null)
+                    {
+                        hero.HeroSuperpowers.Add(new HeroSuperpower
+                        {
+                            Hero = hero,
+                            Superpower = superpower
+                        });
+                    }
+                }
+
+                await _context.Heroes.AddAsync(hero);
+                await _context.SaveChangesAsync();
+
+                return hero;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao adicionar herói: {ex.Message}");
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<Hero>> GetAllAsync()
         {
             return await _context.Heroes.ToListAsync();
@@ -35,26 +73,6 @@ namespace HeroesAPI.Repositories
         {
             return await _context.Heroes
                 .AnyAsync(h => h.HeroName == heroName);
-        }
-
-        public async Task<Hero> AddAsync(Hero hero)
-        {
-            try
-            {
-                hero.BirthDate = hero.BirthDate.ToUniversalTime();
-                hero.CreatedAt = DateTime.UtcNow;
-
-                await _context.Heroes.AddAsync(hero);
-                await _context.SaveChangesAsync();
-
-                return hero; 
-            }
-            catch (Exception ex)
-            {
-                // Log do erro (opcional)
-                Console.WriteLine($"Erro ao adicionar herói: {ex.Message}");
-                throw; // Re-lança a exceção para ser tratada no service
-            }
         }
 
         public async Task UpdateAsync(Hero hero)
@@ -92,6 +110,7 @@ namespace HeroesAPI.Repositories
                     BirthDate = h.BirthDate,
                     Height = h.Height,
                     Weight = h.Weight,
+                    CreatedAt = h.CreatedAt, // ← ADICIONAR ESTA LINHA!
                     Superpowers = h.HeroSuperpowers.Select(hs => new SuperpowerDto
                     {
                         Id = hs.Superpower.Id,
@@ -116,6 +135,7 @@ namespace HeroesAPI.Repositories
                     BirthDate = h.BirthDate,
                     Height = h.Height,
                     Weight = h.Weight,
+                    CreatedAt = h.CreatedAt,
                     Superpowers = h.HeroSuperpowers.Select(hs => new SuperpowerDto
                     {
                         Id = hs.Superpower.Id,
@@ -124,6 +144,41 @@ namespace HeroesAPI.Repositories
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> SuperpowerExistsAsync(int superpowerId)
+        {
+            return await _context.Superpowers.AnyAsync(s => s.Id == superpowerId);
+        }
+
+        public async Task<Superpower?> GetSuperpowerByIdAsync(int superpowerId)
+        {
+            return await _context.Superpowers.FindAsync(superpowerId);
+        }
+
+        public async Task UpdateAsync(Hero hero, List<int> superpowerIds)
+        {
+            // Remover superpoderes existentes
+            var existingSuperpowers = _context.HeroSuperpowers
+                .Where(hs => hs.HeroId == hero.Id);
+            _context.HeroSuperpowers.RemoveRange(existingSuperpowers);
+
+            // Adicionar novos superpoderes
+            foreach (var superpowerId in superpowerIds)
+            {
+                var superpower = await GetSuperpowerByIdAsync(superpowerId);
+                if (superpower != null)
+                {
+                    hero.HeroSuperpowers.Add(new HeroSuperpower
+                    {
+                        Hero = hero,
+                        Superpower = superpower
+                    });
+                }
+            }
+
+            _context.Heroes.Update(hero);
+            await _context.SaveChangesAsync();
         }
     }
 }
