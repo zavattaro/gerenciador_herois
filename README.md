@@ -43,16 +43,18 @@ Antes de executar a aplicação, certifique-se de ter instalado:
 ### 1. **Clone o repositório**
 ```bash
 git clone https://github.com/zavattaro/gerenciador_herois.git
-cd HeroManager
+cd gerenciador_herois
+
 2. Execute a aplicação com um comando
 bash
-docker-compose up -d
+docker-compose up -d --build
+
 3. Acesse as aplicações
 API Backend: http://localhost:8080
 
 Swagger UI: http://localhost:8080/swagger
 
-Frontend Angular: http://localhost:4200 (se configurado)
+Frontend Angular: http://localhost:4200 (se já configurado)
 
 PostgreSQL: localhost:5432
 
