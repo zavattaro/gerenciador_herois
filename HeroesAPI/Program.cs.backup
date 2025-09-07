@@ -50,6 +50,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
+    c.EnableAnnotations(); // ✅ HABILITA ANNOTATIONS DO SWAGGER
 });
 
 var app = builder.Build();
