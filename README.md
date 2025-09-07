@@ -39,7 +39,7 @@ Antes de executar a aplicação, certifique-se de ter instalado:
 ---
 
 ## 🐳 Como Executar com Docker Compose
-
+```bash
 ### 1. **Clone o repositório**
 (abra o bash em uma pasta vazia)
 
@@ -50,7 +50,6 @@ cd gerenciador_herois
 
 3. Execute a aplicação com um comando
 docker-compose up -d --build
-
 ```
 
 3. Acesse as aplicações
