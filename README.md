@@ -52,7 +52,20 @@ cd gerenciador_herois
 docker-compose up -d --build
 ```
 
-3. Acesse as aplicações
+⚠️ Nota Importante:
+A primeira execução pode demorar alguns minutos para baixar as imagens
+
+## 📖 Documentação da API
+
+ - A documentação Swagger é gerada automaticamente a partir dos **XML Comments** (`/// <summary>`) nos controllers. Optamos por esta abordagem em vez de anotações Swagger tradicionais (`[SwaggerOperation]`, `[SwaggerResponse]`) **para resolver problemas de build no Docker**, onde as dependências do Swagger causavam erros durante o processo de publish do container.
+ 
+- ✅ **Estabilidade**: Evita conflitos de pacotes no Docker build
+- ✅ **Manutenibilidade**: Documentação junto ao código-fonte
+- ✅ **Performance**: Menos dependências externas  
+- ✅ **Compatibilidade**: Funciona em qualquer ambiente .NET
+
+
+# Acesse as aplicações
 API Backend: http://localhost:8080
 
 Swagger UI: http://localhost:8080/swagger
@@ -66,15 +79,15 @@ PostgreSQL: localhost:5432
 ## 🏗️ Arquitetura e Organização
 
 ### Estrutura de Pastas
-HeroesAPI/
-├── 📁 Controllers/ # Endpoints da API (Minimal API)
-├── 📁 Models/ # Entidades de Domínio (Hero, Superpower)
-├── 📁 DTO/ # Data Transfer Objects
-├── 📁 Data/ # Entity Framework Context
-├── 📁 Repositories/ # Padrão Repository
-├── 📁 Service/ # Camada de Serviços
-└── 📁 Properties/ # Configurações de execução
 
+**HeroesAPI/**
+- **📁 Controllers/** - Endpoints da API (Minimal API)
+- **📁 Models/** - Entidades de Domínio (Hero, Superpower)  
+- **📁 DTO/** - Data Transfer Objects
+- **📁 Data/** - Entity Framework Context
+- **📁 Repositories/** - Padrão Repository
+- **📁 Service/** - Camada de Serviços
+- **📁 Properties/** - Configurações de execução
 
 ### Decisões Arquiteturais
 
